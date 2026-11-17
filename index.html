@@ -1,0 +1,572 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Rent Record</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="icon-180.png">
+<meta name="theme-color" content="#a8472a">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Rent Record">
+<style>
+:root{--bg:#f4ecdd;--card:#fffaf0;--tx:#2b2118;--mu:#7a6a58;--bd:#e2d5bd;--ac:#a8472a;--ok:#3f6b3a;--bad:#a8321f;--wa:#a8741a;--bo:#2f6fa8;color-scheme:light}
+@media (prefers-color-scheme:dark){:root{--bg:#1b1713;--card:#26201a;--tx:#f1e8d8;--mu:#a99a84;--bd:#3d342a;--ac:#e08a62;--ok:#8fcf86;--bad:#f08a78;--wa:#e6b85c;--bo:#7fb2e5;color-scheme:dark}}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--tx);font:16px/1.4 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;padding:calc(12px + env(safe-area-inset-top,0px)) 14px calc(84px + env(safe-area-inset-bottom,0px));max-width:720px;margin-inline:auto}
+h2,.ttl{font-family:Georgia,"Iowan Old Style","Times New Roman",serif;font-size:20px;margin:0 0 4px;font-weight:700}
+.ttl small{font:12px system-ui,sans-serif;color:var(--mu);margin-left:6px;letter-spacing:.04em;text-transform:uppercase}
+.card{background:var(--card);border:1px solid var(--bd);border-radius:14px;padding:14px;margin-bottom:14px;box-shadow:0 1px 0 var(--bd)}
+.pick{display:flex;gap:8px;margin-bottom:10px}
+.hero{text-align:center;padding:16px 10px;background:var(--card);border:1px solid var(--bd);border-radius:14px;margin-bottom:14px;border-top:4px solid var(--ac)}
+.hero small{display:block;font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--mu)}
+.hero #bal{font:700 38px Georgia,serif;font-variant-numeric:tabular-nums}
+.hero p{margin:4px 0 8px;font-weight:600}
+.mini{display:flex;justify-content:center;gap:22px;color:var(--mu);font-size:14px}.mini b{color:var(--tx)}
+input,select,textarea{width:100%;min-width:0;height:42px;font:inherit;color:var(--tx);background:var(--bg);border:1px solid var(--bd);border-radius:8px;padding:8px}
+textarea{height:130px;font:13px ui-monospace,Menlo,monospace}
+input[type=date]{-webkit-appearance:none;appearance:none;text-align:left;padding:8px 6px;font-size:15px}
+input:focus,select:focus,textarea:focus{outline:2px solid var(--ac);border-color:transparent}
+button{font:inherit;border:0;border-radius:8px;cursor:pointer;padding:9px 14px;background:var(--ac);color:#fff}
+.sec{background:var(--bg);color:var(--tx);border:1px solid var(--bd)}
+.ghost{background:none;color:var(--mu);text-decoration:underline;padding:6px}
+.del{background:none;color:var(--bad);padding:6px 0}
+.big{width:100%;font-size:18px;padding:14px;margin:8px 0 12px}
+.lbl{font-size:12px;color:var(--mu);margin:0 0 6px}
+.th,.tr{display:grid;grid-template-columns:minmax(0,1fr) auto auto;gap:10px;align-items:center}
+.th{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--mu);border-bottom:2px solid var(--tx);padding:8px 4px 4px;margin-top:8px}
+.th span:nth-child(n+2){text-align:right}
+.tr{padding:11px 4px;border-bottom:1px dashed var(--bd);cursor:pointer}
+.tr .n{font-variant-numeric:tabular-nums;font-weight:600;text-align:right}
+.tr small{display:block;color:var(--mu);font-size:12px}
+.tr .nt{color:var(--mu);font-size:13px;text-align:right;max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ed{display:grid;grid-template-columns:1fr 1fr;gap:8px;background:var(--bg);border-radius:10px;padding:10px;margin:4px 0 8px}
+.ed label{font-size:12px;color:var(--mu)}.f{grid-column:1/-1}
+.act{display:flex;justify-content:space-between;align-items:center}
+.empty{text-align:center;font-weight:600;color:var(--ok);margin:18px 0}
+.chip{font-size:12px;padding:3px 9px;border-radius:99px;border:1px solid var(--bd);white-space:nowrap;color:var(--mu)}
+.chip.ok{color:var(--ok);border-color:var(--ok)}.chip.wa{color:var(--wa);border-color:var(--wa)}.chip.bad{color:var(--bad);border-color:var(--bad)}.chip.now{color:var(--ac);border-color:var(--ac)}
+.ok{color:var(--ok)}.bad{color:var(--bad)}
+.tabs{display:flex;gap:6px;margin:8px 0 10px}.tabs button{flex:1}.tabs .on{background:var(--ac);color:#fff;border-color:var(--ac)}
+table{width:100%;border-collapse:collapse;font-size:14px;font-variant-numeric:tabular-nums}
+th,td{padding:7px 4px;text-align:right;border-bottom:1px dashed var(--bd);white-space:nowrap}
+th:first-child,td:first-child{text-align:left}
+th{color:var(--mu);font-size:11px;letter-spacing:.08em;text-transform:uppercase;border-bottom:2px solid var(--tx)}
+tr.tot td{font-weight:700;border-bottom:0;border-top:2px solid var(--tx)}
+.scroll{overflow-x:auto}
+.chips{position:relative;display:flex;gap:6px;overflow-x:auto;margin:0 0 12px;padding-bottom:4px}.chips button{white-space:nowrap;background:var(--bg);color:var(--tx);border:1px solid var(--bd);border-radius:99px;padding:6px 13px;font-size:14px;line-height:1.15}.chips button.on{background:var(--ac);color:#fff;border-color:var(--ac)}.chips small{display:block;font-size:11px;opacity:.8}
+.cat{font:600 12px system-ui,sans-serif;padding:3px 10px;border-radius:99px;border:1px solid var(--bd);color:var(--mu)}.cat.Rent{color:var(--ac);border-color:var(--ac)}.cat.Bond{color:var(--bo);border-color:var(--bo)}.cat.Bills{color:var(--wa);border-color:var(--wa)}
+.mo{font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--mu);margin:10px 0 2px}
+.sect{display:flex;justify-content:space-between;align-items:center;margin:16px 0 2px}
+.ixh{display:flex;justify-content:space-between;align-items:center;font:700 15px Georgia,serif;margin:18px 0 4px;border-bottom:2px solid var(--tx);padding-bottom:3px}.ie{display:grid;grid-template-columns:1fr auto;gap:2px 10px;padding:8px 0;border-bottom:1px dashed var(--bd)}.ie span{font-weight:600}.ie small{grid-column:1/-1;color:var(--mu);font-size:13px}
+.rr{display:grid;grid-template-columns:minmax(0,1fr) 100px 36px;gap:6px;margin-bottom:6px}
+.ov{width:100%;display:flex;justify-content:space-between;margin-bottom:6px;text-align:left}
+.btns{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0}
+nav{position:fixed;left:0;right:0;bottom:0;display:flex;background:var(--card);border-top:1px solid var(--bd);padding-bottom:env(safe-area-inset-bottom,0px);z-index:5}
+nav button{flex:1;background:none;color:var(--mu);border-radius:0;padding:9px 4px 8px;font-size:12px}
+nav button span{display:block;font-size:18px}
+nav button.on{color:var(--ac);font-weight:700;box-shadow:inset 0 2px 0 var(--ac)}
+.jump{display:flex;gap:6px;overflow-x:auto;margin:0 0 14px;align-items:center}.jump span{font-size:12px;color:var(--mu);white-space:nowrap}.jump button{white-space:nowrap;background:var(--card);color:var(--tx);border:1px solid var(--bd);border-radius:99px;padding:7px 13px;font-size:14px}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:8px 0 10px}.two label{font-size:12px;color:var(--mu)}.two select,.two input{margin-top:4px}
+.b4{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:12px 0}.b4 button{padding:12px 4px;font-size:15px;line-height:1.15}
+.hc{background:var(--card);border:1px solid var(--bd);border-radius:14px;padding:12px 14px;margin-bottom:10px}.hh{display:flex;justify-content:space-between;gap:10px}.hh b{font:700 16px Georgia,serif}.hs{margin-top:6px;font-size:14px;color:var(--mu)}.hp{margin-top:6px;font-size:14px}.hbar{display:flex;flex-wrap:wrap;gap:4px 16px;font-size:14px;color:var(--mu);margin:2px 2px 12px}.hbar b{color:var(--tx)}
+.dlg{position:fixed;inset:0;background:rgba(0,0,0,.5);display:none;align-items:center;justify-content:center;padding:20px;z-index:20}.dbox{background:var(--card);border:1px solid var(--bd);border-radius:14px;padding:18px;max-width:360px;width:100%}.dbox p{margin:0 0 14px}.dbox .act{display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap}
+.pb{margin-top:6px;padding:5px 12px;font-size:13px;background:var(--ac);color:#fff;border-radius:99px}.pb.sec{background:var(--bg);color:var(--tx);border:1px solid var(--bd)}
+.wp{display:grid;grid-template-columns:minmax(0,1fr) 92px auto;gap:6px;margin-bottom:6px;align-items:center}.wp .del{font-size:18px}
+section{display:none}section.on{display:block}
+</style>
+</head>
+<body>
+<div class="pick"><select id="who" onchange="switchT(this.value)"></select><button onclick="addTenant()">+ Person</button></div>
+<div class="hero"><small id="ballbl"></small><div id="bal"></div><p id="line"></p>
+  <div class="mini"><span>Due <b id="due"></b></span><span>Paid <b id="paid"></b></span></div></div>
+
+<section id="v-weeks" class="on"><div class="card">
+  <div class="ttl">Timesheet <small>unpaid weeks</small></div>
+  <div class="th"><span>Week</span><span>Due</span><span>Status</span></div>
+  <div id="weeks"></div>
+  <div class="btns"><button onclick="go('pay')">✓ Mark rent paid</button><button class="sec" onclick="addPeriod()">+ Add week</button><button class="ghost" id="tgl" onclick="SHOWPAID=!SHOWPAID;render()"></button></div>
+  <p class="lbl">Tap a week to edit it. New weeks are added by themselves.</p>
+</div></section>
+
+<section id="v-pay"><div class="card">
+  <div class="ttl">Rent paid <small>ledger</small></div>
+  <div class="two"><label>Day paid<input id="pdate" type="date"></label><label>Amount ($)<input id="pamt" type="number" inputmode="decimal" step="0.01" placeholder="amount owing"></label></div>
+  <div class="two"><label>Type<select id="ptype"></select></label><label>Note<input id="pnote" placeholder="optional"></label></div>
+  <div class="two"><label style="grid-column:1/-1">For week<select id="pweek" onchange="pwk()"></select></label></div>
+  <button class="big" onclick="markPaid()">✓ Mark paid</button>
+  <p class="lbl" id="pmsg" style="text-align:center"></p>
+  <div class="th"><span>Date</span><span>Amount</span><span>Note</span></div>
+  <div id="pays"></div>
+  <div class="btns"><button class="sec" onclick="addPayment()">+ Add earlier payment</button></div>
+  <p class="lbl">Pick the day it was paid. Leave the amount empty to use what is owing. Tap any entry below to edit it.</p>
+</div></section>
+
+<section id="v-hist"><div class="card">
+  <div class="ttl">History <small>payments</small></div>
+  <div class="two"><label>Year<select id="hy" onchange="hset()"></select></label><label>Month<select id="hm" onchange="hset()"></select></label></div>
+  <p class="lbl">Jump to week number (uses the year above, or this year)</p>
+  <input id="hw" type="number" inputmode="numeric" placeholder="e.g. 46" oninput="hweek(this.value)">
+  <div class="b4"><button onclick="hnav(-1)">◀ Prev</button><button onclick="hnav(0)">This week</button><button onclick="hnav(1)">Next ▶</button><button onclick="hnav(null)">All</button></div>
+  <button class="sec" style="width:100%" onclick="shareH()">Share / copy report of what’s showing</button>
+  <p class="lbl" id="hmsg" style="margin-top:8px"></p>
+</div>
+<div id="hlist"></div></section>
+
+<section id="v-more">
+  <div class="card"><h2>Person</h2>
+    <p class="lbl">Name</p><input id="nm" placeholder="Name" oninput="S.name=this.value;save();who()">
+    <p class="lbl" style="margin-top:10px">Start date (when the stay starts)</p><input id="sdate" type="date" onchange="setStart(this.value)">
+    <button class="del" onclick="delTenant()">Delete this person</button></div>
+  <div class="card" id="ovcard"><h2>Everyone</h2><div id="ov"></div></div>
+  <div class="card"><h2>Weekly rate</h2>
+    <p class="lbl">Amount for new weeks, from the date shown. Weeks already added don’t change.</p>
+    <div id="rates"></div><button class="sec" onclick="addRate()">+ Rate change</button></div>
+  <div class="card"><h2>Weeks</h2>
+    <p class="lbl">Every week runs Monday to Sunday, and a new week is added each Monday. If some weeks start on another day, align them. Amounts, notes and payments are kept.</p>
+    <button class="sec" onclick="alignNow()">Align this person’s weeks to Mon–Sun</button></div>
+  <div class="card"><h2>Backup &amp; share</h2>
+    <p class="lbl">Backup holds everyone. CSV is for the person selected. To move your records to another phone, copy the backup, paste it there and tap Restore.</p>
+    <div class="btns"><button class="sec" onclick="show(csv())">CSV</button><button class="sec" onclick="show(JSON.stringify(ALL))">Backup</button><button class="sec" onclick="restore()">Restore</button></div>
+    <textarea id="box" placeholder="Tap a button above. To restore, paste a backup here, then tap Restore." spellcheck="false"></textarea>
+    <p class="lbl" id="msg" style="margin-top:6px"></p></div>
+  <p class="lbl" id="off" style="text-align:center"></p>
+  <p class="lbl" id="cloud" style="text-align:center"></p>
+  <button class="ghost" onclick="resetAll()">Reset everything</button>
+</section>
+
+<div id="wsheet" class="dlg" onclick="if(event.target===this)closeWeek()"><div class="dbox" id="wbox" style="max-height:85vh;overflow:auto"></div></div>
+<div id="dlg" class="dlg"><div class="dbox"><p id="dmsg"></p><div class="act"><button class="sec" id="dno" onclick="dno()">Cancel</button><button class="sec" id="dalt" onclick="dalt()"></button><button id="dyes" onclick="dok()">OK</button></div></div></div>
+
+<nav id="nav">
+  <button data-t="weeks" onclick="go('weeks')"><span>🗓</span>Weeks</button>
+  <button data-t="pay" onclick="go('pay')"><span>💵</span>Paid</button>
+  <button data-t="hist" onclick="go('hist')"><span>🕘</span>History</button>
+  <button data-t="more" onclick="go('more')"><span>⚙️</span>More</button>
+</nav>
+
+<script>
+var KEY="payment-record-v1",ALL,S,SHOWPAID=false,VIEW="week",OPEN=null,SEL={week:null,month:null,year:null},H={y:"",m:"",wk:null},MN=["January","February","March","April","May","June","July","August","September","October","November","December"];
+function iso(d){return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0")}
+function today(){return iso(new Date())}
+function fmt(s){if(!s)return"";var p=s.split("-");return p[2]+"/"+p[1]+"/"+p[0]}
+function dd(s){return s?new Date(s+"T00:00:00").toLocaleDateString("en-AU",{day:"numeric",month:"short"}):"—"}
+function ddy(s){return s?new Date(s+"T00:00:00").toLocaleDateString("en-AU",{day:"numeric",month:"short",year:"numeric"}):"—"}
+function money(n){return(n<-0.005?"-":"")+"$"+(Math.round(Math.abs(n)*100)/100).toLocaleString("en-AU",{minimumFractionDigits:0,maximumFractionDigits:2})}
+function esc(s){return String(s==null?"":s).replace(/&/g,"&amp;").replace(/"/g,"&quot;").replace(/</g,"&lt;")}
+function num(v){return parseFloat(v)||0}
+function $(i){return document.getElementById(i)}
+function defT(){var t=today();return{id:"t1",name:"Tenant 1",start:t,periods:[],payments:[],rates:[{from:t,m:200}]}}
+function defAll(){return{cur:"t1",tenants:[defT()]}}
+function load(){try{var r=localStorage.getItem(KEY);if(r){var o=JSON.parse(r);
+ if(o&&Array.isArray(o.tenants)&&o.tenants.length){ALL=o;return}
+ if(o&&Array.isArray(o.periods)&&Array.isArray(o.payments)){ALL={cur:"t1",tenants:[Object.assign({id:"t1",name:"Tenant 1"},o)]};return}}}catch(e){}
+ ALL=defAll()}
+var BOOT=true,USER_EDIT=false,LT=0,CL=null,CSYNC=false,CTIM=null;
+function save(){ALL.ts=Date.now();if(!BOOT)USER_EDIT=true;try{localStorage.setItem(KEY,JSON.stringify(ALL))}catch(e){}cloudPush()}
+function cloudSay(t){var e=$("cloud");if(e)e.textContent=t}
+function cloudPush(){
+ if(!CL||!CSYNC)return;clearTimeout(CTIM);
+ CTIM=setTimeout(function(){CL.set({v:JSON.stringify(ALL),t:ALL.ts}).then(function(){cloudSay("Also backed up to your account ✓")},function(){cloudSay("Account backup failed. Your records are still saved on this device.")})},900)}
+function cloudInit(){
+ try{if(!window.claude||!claude.use)return;
+  Promise.all([claude.use("db"),claude.use("user")]).then(function(r){
+   var db=r[0],u=r[1];if(!db||!u||!u.id)return;
+   return u.id().then(function(id){if(!id)return;CL=db.doc("data/users/"+id+"/rent-record");return CL.get()}).then(function(sn){
+    if(!CL)return;
+    var d=sn&&sn.exists?sn.data():null,c=null,adopt=false;
+    try{c=d&&JSON.parse(d.v)}catch(e){}
+    adopt=!!(c&&Array.isArray(c.tenants)&&c.tenants.length&&!USER_EDIT&&(d.t||0)>LT);
+    if(adopt){ALL=c;migrate();if(!ALL.al)alignAll();pick();OPEN=null;autoWeeks();try{localStorage.setItem(KEY,JSON.stringify(ALL))}catch(e){}render();cloudSay("Restored from your account backup ✓")}
+    CSYNC=true;if(!adopt)cloudPush()})}).catch(function(){})}catch(e){}}
+function pick(){S=ALL.tenants.filter(function(t){return t.id===ALL.cur})[0]||ALL.tenants[0];ALL.cur=S.id}
+function migrate(){ALL.tenants.forEach(function(t){
+ t.name=t.name||"Tenant";t.periods=t.periods||[];t.payments=t.payments||[];t.payments.forEach(function(p){if(!p.c)p.c="Rent"});
+ t.periods.forEach(function(p){if(p.n==null)p.n=""});
+ var f=t.periods.map(function(p){return p.a}).filter(Boolean).sort()[0]||today();
+ if(!t.rates||!t.rates.length)t.rates=[{from:f,m:t.rate==null?200:t.rate}];
+ delete t.rate;if(!t.start)t.start=f})}
+function rateFor(s,T){T=T||S;
+ var r=T.rates.slice().sort(function(x,y){return(x.from||"").localeCompare(y.from||"")}),m=r.length?num(r[0].m):0;
+ r.forEach(function(x){if(x.from&&x.from<=s)m=num(x.m)});return m}
+function autoWeeks(){
+ var t=new Date();t.setHours(0,0,0,0);var ch=false;
+ ALL.tenants.forEach(function(T){
+  var l=T.periods.map(function(p){return p.b}).filter(Boolean).sort().pop(),s;
+  if(l){s=new Date(l+"T00:00:00");s.setDate(s.getDate()+1)}else if(T.start){s=new Date(T.start+"T00:00:00")}else return;
+  var n=0;
+  while(s<=t&&n<300){var e=sunOnOrAfter(s);
+   T.periods.push({a:iso(s),b:iso(e),m:rateFor(iso(s),T),n:""});
+   s=new Date(e);s.setDate(s.getDate()+1);n++;ch=true}});
+ if(ch)save()}
+function alloc(){
+ var per=S.periods,idx={},pool=[],al=per.map(function(p,i){if(p.a)idx[p.a]=i;return{d:num(p.m),a:0,on:"",ok:false,part:false,pays:[]}});
+ S.payments.filter(isRent).forEach(function(q){var m=num(q.m),i=(q.w&&idx[q.w]!==undefined)?idx[q.w]:-1;
+  if(i<0){pool.push({q:q,r:m});return}
+  var x=al[i],t=Math.min(m,Math.max(0,x.d-x.a));
+  if(t>0.005){x.a+=t;x.pays.push({q:q,t:t})}
+  if(m-t>0.005)pool.push({q:q,r:m-t})});
+ pool.sort(function(u,v){return(u.q.d||"").localeCompare(v.q.d||"")});
+ var k=0;
+ al.forEach(function(x){
+  while(x.a<x.d-0.005&&k<pool.length){if(pool[k].r<=0.005){k++;continue}var t=Math.min(pool[k].r,x.d-x.a);pool[k].r-=t;x.a+=t;x.pays.push({q:pool[k].q,t:t})}});
+ al.forEach(function(x){x.ok=x.d>0&&x.a>=x.d-0.005;x.part=x.a>0.005&&x.a<x.d-0.005;
+  x.pays.sort(function(u,v){return(u.q.d||"").localeCompare(v.q.d||"")});
+  x.on=x.pays.length?x.pays[x.pays.length-1].q.d:""});
+ return al}
+function chip(p,x){var h="";
+ if(p.a&&p.b&&p.a<=today()&&today()<=p.b)h+='<span class="chip now">This week</span> ';
+ if(x.d<=0)return h;
+ return h+(x.ok?'<span class="chip ok">Paid'+(x.on?' '+fmt(x.on).slice(0,5):'')+'</span>':x.part?'<span class="chip wa">Part '+money(x.a)+'</span>':'<span class="chip bad">Unpaid</span>')}
+function bal(T){var d=0,p=0;T.periods.forEach(function(x){d+=num(x.m)});T.payments.filter(isRent).forEach(function(x){p+=num(x.m)});return d-p}
+function inp(t,i,k,ty){
+ if(ty==="wk")return '<select onchange="upd(\''+t+'\','+i+',\''+k+'\',this.value)">'+weekOpts(S[t][i][k]||"")+'</select>';
+ if(ty==="cat")return '<select onchange="upd(\''+t+'\','+i+',\''+k+'\',this.value)">'+CATS.map(function(c){return '<option'+(catOf(S[t][i])===c?' selected':'')+'>'+c+'</option>'}).join("")+'</select>';
+ var a='upd(\''+t+'\','+i+',\''+k+'\',this.value';
+ return '<input type="'+ty+'" '+(ty==="number"?'inputmode="decimal" step="0.01" ':'')+'value="'+esc(S[t][i][k])+'" '+(ty==="date"?'onchange="'+a+')"':'oninput="'+a+',1)"')+'>'}
+function panel(t,i,f){
+ return '<div class="ed">'+f.map(function(x){return '<label class="'+(x[3]||"")+'">'+x[0]+inp(t,i,x[1],x[2])+'</label>'}).join("")+
+ '<div class="f act"><button class="del" onclick="del(\''+t+'\','+i+')">Delete</button><button onclick="tog()">Done</button></div></div>'}
+function tog(t,i){var o=t?S[t][i]:null;OPEN=(o&&OPEN===o)?null:o;render()}
+function who(){
+ $("who").innerHTML=ALL.tenants.map(function(t){return '<option value="'+t.id+'"'+(t.id===S.id?' selected':'')+'>'+esc(t.name||"(no name)")+'</option>'}).join("");
+ $("ovcard").style.display=ALL.tenants.length>1?"block":"none";
+ $("ov").innerHTML=ALL.tenants.map(function(t){var b=bal(t);
+  return '<button class="sec ov" onclick="switchT(\''+t.id+'\')"><span>'+esc(t.name||"(no name)")+(t.id===S.id?' ●':'')+'</span><span class="'+(b>0.005?'bad':'ok')+'">'+(b>0.005?'Owing '+money(b):b<-0.005?'Credit '+money(-b):'Paid up')+'</span></button>'}).join("")}
+function render(){
+ S.periods.sort(function(x,y){return(x.a||"").localeCompare(y.a||"")});
+ S.rates.sort(function(x,y){return(x.from||"").localeCompare(y.from||"")});
+ S.payments.sort(function(x,y){return(y.d||"").localeCompare(x.d||"")});
+ var al=alloc(),h="",np=0;
+ S.periods.forEach(function(p,i){var x=al[i];if(x.ok){np++;if(!SHOWPAID)return}
+  h+='<div class="tr" onclick="openWeek('+i+')"><span>'+dd(p.a)+' – '+dd(p.b)+'<small>'+esc(p.n||(p.b||"").slice(0,4))+'</small><button class="pb'+(x.ok?' sec':'')+'" onclick="event.stopPropagation();openWeek('+i+')">'+(x.ok?'✎ Edit':'✓ Mark paid')+'</button></span><span class="n" id="a'+i+'"></span><span id="st'+i+'"></span></div>';
+  if(OPEN===p)h+=panel("periods",i,[["From","a","date"],["To","b","date"],["Amount ($)","m","number"],["Note","n","text","f"]])});
+ if(!h)h='<p class="'+(np?'empty':'lbl')+'" style="text-align:center">'+(np?'✓ All weeks are paid up':'No weeks yet. Set a start date in More.')+'</p>';
+ $("weeks").innerHTML=h;
+ $("tgl").style.display=np?"":"none";$("tgl").textContent=SHOWPAID?"Hide paid weeks":"Show paid weeks ("+np+")";
+ h="";
+ var pw=new Map();S.periods.forEach(function(q,i){al[i].pays.forEach(function(z){var a=pw.get(z.q)||[];a.push(q);pw.set(z.q,a)})});
+ CATS.forEach(function(c){var tot=0,rows="";
+  S.payments.forEach(function(p,i){if(catOf(p)!==c)return;tot+=num(p.m);
+   rows+='<div class="tr" onclick="tog(\'payments\','+i+')"><span>'+ledLabel(p,pw)+'</span><span class="n" id="pa'+i+'"></span><span class="nt">'+esc(p.n)+'</span></div>';
+   if(OPEN===p)rows+=panel("payments",i,[["Date","d","date"],["Amount ($)","m","number"],["Category","c","cat"],["For week","w","wk","f"],["Note","n","text","f"]])});
+  if(rows)h+='<div class="sect"><span class="cat '+c+'">'+c+'</span><b>'+money(tot)+'</b></div>'+rows});
+ $("pays").innerHTML=h||'<p class="lbl" style="text-align:center">No payments yet.</p>';
+ var cw=$("pweek").value;$("pweek").innerHTML=weekOpts(cw);$("nm").value=S.name;$("sdate").value=S.start||"";
+ $("rates").innerHTML=S.rates.map(function(r,i){return '<div class="rr">'+inp("rates",i,"from","date")+inp("rates",i,"m","number")+'<button class="del" onclick="del(\'rates\','+i+')" aria-label="Delete">✕</button></div>'}).join("");
+ totals()}
+function totals(){
+ var d=0,p=0;S.periods.forEach(function(x){d+=num(x.m)});S.payments.filter(isRent).forEach(function(x){p+=num(x.m)});
+ var b=d-p,al=alloc(),last=null,owe=0;
+ S.periods.forEach(function(q,i){var s=$("st"+i),a=$("a"+i);if(s)s.innerHTML=chip(q,al[i]);if(a)a.textContent=money(num(q.m));
+  if(al[i].d>0){if(al[i].ok)last=q.b;else owe++}});
+ S.payments.forEach(function(q,i){var a=$("pa"+i);if(a)a.textContent=money(num(q.m))});
+ $("due").textContent=money(d);pwk();$("paid").textContent=money(p);
+ $("bal").textContent=b>0.005?money(b):b<-0.005?money(-b):"Paid up";
+ $("bal").className=b>0.005?"bad":"ok";
+ $("ballbl").textContent=b>0.005?"Still owing":b<-0.005?"Credit":"";
+ var t;
+ if(b>0.005)t=(last?"Paid up to "+fmt(last):"No week fully paid yet")+" · "+owe+" week"+(owe==1?"":"s")+" not fully paid";
+ else if(b<-0.005)t="All weeks paid, with credit for the next weeks";
+ else t=last?"All paid up to "+fmt(last):"Nothing due yet";
+ var lp=S.payments.filter(isRent).map(function(x){return x.d}).filter(Boolean).sort().pop();
+ $("line").textContent=t+(lp?" · Last paid "+fmt(lp):"");
+ who();renderHist()}
+function upd(t,i,k,v,q){if(t==="periods"&&k==="a"){var oa=S[t][i].a;S.payments.forEach(function(z){if(z.w===oa)z.w=v})}S[t][i][k]=v;save();if(q)totals();else render()}
+function ask(msg,cb,o){o=o||{};$("dmsg").textContent=msg;DCB=cb;DALT=o.alt||null;
+ $("dyes").style.display=o.info?"none":"";$("dyes").textContent=o.yes||"OK";
+ $("dalt").style.display=o.alt?"":"none";$("dalt").textContent=o.altLabel||"";
+ $("dno").textContent=o.info?"OK":"Cancel";$("dlg").style.display="flex"}
+function dok(){$("dlg").style.display="none";var f=DCB;DCB=null;DALT=null;if(f)f()}
+function dalt(){$("dlg").style.display="none";var f=DALT;DCB=null;DALT=null;if(f)f()}
+function dno(){$("dlg").style.display="none";DCB=null;DALT=null}
+function del(t,i){
+ if(t==="rates"&&S.rates.length<2){ask("Keep at least one weekly rate.",null,{info:1});return}
+ ask("Delete this entry?",function(){S[t].splice(i,1);OPEN=null;save();render()},{yes:"Delete"})}
+function addRate(){var t=today();S.rates.push({from:t,m:rateFor(t)});save();render()}
+function addPeriod(){
+ var l=S.periods[S.periods.length-1],a="",b="";
+ if(l&&l.b){var d=new Date(l.b+"T00:00:00");d.setDate(d.getDate()+1);a=iso(d);b=iso(sunOnOrAfter(d))}
+ var o={a:a,b:b,m:a?rateFor(a):"",n:""};S.periods.push(o);save();render();openWeekObj(o)}
+var WSH=null;
+function openWeek(i){openWeekObj(S.periods[i])}
+function openWeekObj(p){WSH=p;renderSheet();$("wsheet").style.display="flex"}
+function closeWeek(){WSH=null;$("wsheet").style.display="none";render()}
+function renderSheet(){
+ var p=WSH,i=S.periods.indexOf(p);if(i<0){closeWeek();return}
+ var al=alloc(),x=al[i],lk=[],ot=[];
+ S.payments.forEach(function(q,j){if(q.w===p.a&&isRent(q))lk.push(j)});
+ x.pays.forEach(function(z){if(z.q.w!==p.a)ot.push(z)});
+ var ow=x.d-x.a,rem=Math.max(0,ow);
+ var h='<h2>'+esc(hlabel(p))+'</h2><p class="hs" style="margin:0 0 4px">'+chip(p,x)+'</p>';
+ h+='<p class="lbl">Due <b>'+money(x.d)+'</b> · Paid <b>'+money(x.a)+'</b> · '+(ow>0.005?'Owing <b class="bad">'+money(ow)+'</b>':'<b class="ok">Paid up</b>')+(x.a>0?'<br>'+(x.ok?'Paid on ':'Last payment on ')+fmt(x.on):'')+'</p>';
+ h+='<div class="mo">Mark paid</div><div class="wp"><input type="date" id="wd" value="'+today()+'"><input type="number" inputmode="decimal" step="0.01" id="wm" placeholder="'+money(rem)+'"><button onclick="wadd()">✓ Paid</button></div><p class="lbl">Pick the day it was paid. Leave the amount empty to use what is owing.</p>';
+ h+='<div class="mo">Payments for this week</div>';
+ h+=lk.length?lk.map(function(j){var q=S.payments[j];return '<div class="wp"><input type="date" value="'+esc(q.d)+'" onchange="wupd('+j+',this.value)"><input type="number" inputmode="decimal" step="0.01" value="'+esc(q.m)+'" oninput="wq('+j+',this.value)" onchange="renderSheet()"><button class="del" onclick="wdel('+j+')" aria-label="Delete">✕</button></div>'}).join("")+'<button class="sec" style="margin-top:4px" onclick="wunpaid()">Mark unpaid</button>':'<p class="lbl">No payment recorded for this week.</p>';
+ if(ot.length)h+='<p class="lbl">Also covered by: '+ot.map(function(z){return fmt(z.q.d)+' '+money(z.t)}).join(' · ')+' (change these in the Paid tab)</p>';
+ h+='<div class="mo">Edit week</div><div class="ed" style="margin:0"><label>From<input type="date" value="'+esc(p.a)+'" onchange="wk(\'a\',this.value)"></label><label>To<input type="date" value="'+esc(p.b)+'" onchange="wk(\'b\',this.value)"></label><label>Amount ($)<input type="number" inputmode="decimal" step="0.01" value="'+esc(p.m)+'" oninput="wk(\'m\',this.value,1)" onchange="wk(\'m\',this.value)"></label><label>Note<input value="'+esc(p.n)+'" oninput="wk(\'n\',this.value,1)"></label></div>';
+ h+='<div class="act" style="margin-top:14px;justify-content:space-between"><button class="del" onclick="wdelw()">Delete week</button><button onclick="closeWeek()">Done</button></div>';
+ $("wbox").innerHTML=h}
+function wk(k,v,q){var p=WSH;if(k==="a"){S.payments.forEach(function(z){if(z.w===p.a)z.w=v})}p[k]=v;save();if(q)return;render();renderSheet()}
+function removeWeek(p){S.payments=S.payments.filter(function(q){return q.w!==p.a});S.periods.splice(S.periods.indexOf(p),1);save()}
+function wunpaid(){var p=WSH;ask("Mark this week as unpaid? The payments listed for this week will be deleted.",function(){S.payments=S.payments.filter(function(q){return q.w!==p.a});save();render();renderSheet()},{yes:"Mark unpaid"})}
+function wdelw(){var p=WSH;
+ ask("Delete the week "+dd(p.a)+" – "+dd(p.b)+" and its payments?",function(){removeWeek(p);closeWeek()},
+  {yes:"Delete week",altLabel:"Delete & re-create",alt:function(){var o={a:p.a,b:p.b,m:rateFor(p.a),n:""};removeWeek(p);S.periods.push(o);save();render();openWeekObj(o)}})}
+function wupd(j,v){S.payments[j].d=v;save();renderSheet()}
+function wq(j,v){S.payments[j].m=v;save()}
+function wdel(j){ask("Delete this payment?",function(){S.payments.splice(j,1);save();renderSheet()},{yes:"Delete"})}
+function wadd(){
+ var p=WSH,x=alloc()[S.periods.indexOf(p)],d=$("wd").value||today(),a=$("wm").value,m=a!==""?num(a):Math.max(0,x.d-x.a);
+ if(!(m>0)){$("wm").placeholder="enter amount";return}
+ S.payments.push({d:d,m:Math.round(m*100)/100,n:"",c:"Rent",w:p.a});save();renderSheet()}
+function sunOnOrAfter(d){var e=new Date(d);e.setDate(e.getDate()+(6-(e.getDay()+6)%7));return e}
+function dn(s){return Math.round(new Date(s+"T00:00:00").getTime()/864e5)}
+function isAligned(T){
+ var ps=T.periods.filter(function(p){return p.a&&p.b}).sort(function(x,y){return x.a.localeCompare(y.a)});
+ return ps.every(function(p,i){
+  if(new Date(p.b+"T00:00:00").getDay()!==0)return false;
+  return i===0||(new Date(p.a+"T00:00:00").getDay()===1&&dn(p.a)===dn(ps[i-1].b)+1)})}
+function alignWeeks(T){
+ var old=T.periods.filter(function(p){return p.a&&p.b}).sort(function(x,y){return x.a.localeCompare(y.a)});
+ var first=old.length?old[0].a:T.start;if(!first)return;
+ var t=new Date();t.setHours(0,0,0,0);
+ var endD=sunOnOrAfter(t),last=old.length?old[old.length-1].a:"";
+ if(last&&last>iso(endD))endD=sunOnOrAfter(new Date(last+"T00:00:00"));
+ var ws=[],s=new Date(first+"T00:00:00");
+ while(s<=endD&&ws.length<600){var e=sunOnOrAfter(s);ws.push({a:iso(s),b:iso(e),m:null,n:""});s=new Date(e);s.setDate(s.getDate()+1)}
+ function ov(a1,b1,a2,b2){return Math.max(0,Math.min(dn(b1),dn(b2))-Math.max(dn(a1),dn(a2))+1)}
+ ws.forEach(function(w){var best=null,bo=0;
+  old.forEach(function(o){var v=ov(w.a,w.b,o.a,o.b);if(v>bo){bo=v;best=o}});
+  if(best){w.m=best.m;w.n=best.n||""}else w.m=rateFor(w.a,T)});
+ var map={};
+ old.forEach(function(o){var best=null,bo=0;ws.forEach(function(w){var v=ov(o.a,o.b,w.a,w.b);if(v>bo){bo=v;best=w}});if(best)map[o.a]=best.a});
+ T.payments.forEach(function(q){if(q.w&&map[q.w])q.w=map[q.w]});
+ T.periods=ws}
+function alignAll(){ALL.tenants.forEach(function(T){if(T.periods.length&&!isAligned(T))alignWeeks(T)});ALL.al=1;save()}
+function alignNow(){ask("Align all of "+(S.name||"this person")+"’s weeks to Monday–Sunday? Amounts, notes and payments are kept.",function(){alignWeeks(S);OPEN=null;autoWeeks();save();render()},{yes:"Align weeks"})}
+function weekOpts(sel){var al=alloc();
+ return '<option value="">Oldest unpaid week (automatic)</option>'+S.periods.map(function(p,i){return{p:p,x:al[i]}}).filter(function(r){return r.p.a}).reverse().map(function(r){return '<option value="'+esc(r.p.a)+'"'+(sel===r.p.a?' selected':'')+'>Wk '+isoWeek(r.p.a)+' · '+dd(r.p.a)+' – '+dd(r.p.b)+(r.x.ok?' ✓':'')+'</option>'}).join("")}
+function forWk(q,p,pw){
+ if(!isRent(q))return "";var ws=pw.get(q);if(!ws||!ws.length)return " · not applied to a week yet";
+ ws=ws.slice().sort(function(x,y){return(x.a||"").localeCompare(y.a||"")});var f=ws[0],l=ws[ws.length-1];
+ if(ws.length===1&&f===p)return " · for this week";
+ return " · for Week "+isoWeek(f.a)+(ws.length>1?"–"+isoWeek(l.a):"")}
+function ledLabel(p,pw){var t=wkText(p,pw);return t?'<b>'+esc(t)+'</b><small>Paid '+ddy(p.d)+'</small>':'<b>'+ddy(p.d)+'</b>'}
+function wkText(p,pw){
+ if(!isRent(p))return "";var ws=pw.get(p);if(!ws||!ws.length)return "Not applied to a week yet";
+ ws=ws.slice().sort(function(x,y){return(x.a||"").localeCompare(y.a||"")});var f=ws[0],l=ws[ws.length-1];
+ return ws.length===1?"Week "+isoWeek(f.a)+" · "+dd(f.a)+" – "+dd(f.b):"Weeks "+isoWeek(f.a)+"–"+isoWeek(l.a)+" · "+dd(f.a)+" – "+dd(l.b)}
+function pwk(){
+ var w=$("pweek").value,k=w?S.periods.findIndex(function(p){return p.a===w}):-1,b=bal(S);
+ if(k>=0){var x=alloc()[k];$("pamt").placeholder="owing "+money(Math.max(0,x.d-x.a))}else $("pamt").placeholder=b>0.005?"owing "+money(b):"amount"}
+function markPaid(){
+ var d=$("pdate").value||today(),c=$("ptype").value||"Rent",a=$("pamt").value,o=bal(S),w=c==="Rent"?($("pweek").value||""):"",m;
+ if(a!=="")m=num(a);
+ else if(c!=="Rent")m=0;
+ else if(w){var k=S.periods.findIndex(function(p){return p.a===w}),x=k>=0?alloc()[k]:null;m=x?Math.max(0,x.d-x.a):0}
+ else m=o>0.005?o:rateFor(d);
+ if(!(m>0)){$("pmsg").textContent=w?"That week is already paid. Type an amount.":"Enter an amount first.";return}
+ m=Math.round(m*100)/100;
+ var q={d:d,m:m,n:$("pnote").value,c:c};if(w)q.w=w;
+ S.payments.push(q);save();
+ $("pamt").value="";$("pnote").value="";$("pdate").value=today();$("pweek").value="";
+ render();$("pmsg").textContent="Recorded "+money(m)+" ("+c+") paid on "+fmt(d)+(w?" for week "+isoWeek(w):"")+"."}
+function paidToday(){var o=bal(S),t=today();
+ S.payments.push({d:t,m:Math.round((o>0.005?o:rateFor(t))*100)/100,n:"",c:"Rent"});save();render()}
+function addPayment(){var o={d:today(),m:"",n:"",c:"Rent"};S.payments.push(o);OPEN=o;save();render()}
+function switchT(id){ALL.cur=id;pick();OPEN=null;save();render()}
+function addTenant(){
+ var t=today(),m=rateFor(t)||200;
+ var T={id:"t"+Date.now().toString(36)+Math.floor(Math.random()*1000),name:"New person",start:t,periods:[],payments:[],rates:[{from:t,m:m}]};
+ ALL.tenants.push(T);ALL.cur=T.id;pick();OPEN=null;autoWeeks();save();render();go("more");
+ setTimeout(function(){$("nm").focus();$("nm").select()},50)}
+function delTenant(){
+ if(ALL.tenants.length<2){ask("You need at least one person.",null,{info:1});return}
+ ask("Delete "+(S.name||"this person")+" and all their records?",function(){ALL.tenants=ALL.tenants.filter(function(t){return t.id!==S.id});ALL.cur=ALL.tenants[0].id;pick();OPEN=null;save();render()},{yes:"Delete"})}
+function setStart(v){
+ if(!v){render();return}
+ function rebuild(){S.start=v;S.periods=[];OPEN=null;
+  S.rates.sort(function(x,y){return(x.from||"").localeCompare(y.from||"")});
+  if(S.rates[0]&&S.rates[0].from>v)S.rates[0].from=v;
+  autoWeeks();save();render()}
+ if(S.periods.length===0){rebuild();return}
+ render();
+ ask("Start date "+fmt(v)+". Rebuild the weeks from this date? Existing weeks will be replaced. Payments are kept.",rebuild,{yes:"Rebuild weeks",alt:function(){S.start=v;save();render()},altLabel:"Only change the date"})}
+function resetAll(){ask("Reset everything, for all people? This cannot be undone.",function(){ALL=defAll();pick();OPEN=null;autoWeeks();save();render()},{yes:"Reset"})}
+/* summary */
+function isoWeek(s){var d=new Date(s+"T00:00:00");d.setDate(d.getDate()+3-(d.getDay()+6)%7);var w=new Date(d.getFullYear(),0,4);return 1+Math.round(((d-w)/864e5-3+(w.getDay()+6)%7)/7)}
+function opts(){
+ var t=today(),ps=S.periods,all=ps.map(function(p){return p.a}).concat(S.payments.map(function(p){return p.d})).filter(Boolean).sort(),first=all[0]||t,last=all[all.length-1]||t,o=[];
+ if(VIEW==="week"){ps.forEach(function(p){if(p.a)o.push({k:p.a,l:"Wk "+isoWeek(p.a),s:dd(p.a)})});return o}
+ var y0=+first.slice(0,4),m0=+first.slice(5,7),yEnd=Math.max(+t.slice(0,4),+last.slice(0,4));
+ if(VIEW==="year"){for(var y=y0;y<=yEnd+1;y++)o.push({k:""+y,l:""+y,s:""});return o}
+ for(var y=y0,m=m0;y<yEnd||(y===yEnd&&m<=12);){o.push({k:y+"-"+String(m).padStart(2,"0"),l:new Date(y,m-1,1).toLocaleDateString("en-AU",{month:"short"}),s:""+y});if(++m>12){m=1;y++}}
+ return o}
+function chipsHTML(){
+ var o=opts(),s=SEL[VIEW],h='<div class="chips" id="chips"><button class="'+(s?'':'on')+'" onclick="pickSel(null)">All</button>';
+ o.forEach(function(x){h+='<button class="'+(s===x.k?'on':'')+'" onclick="pickSel(\''+x.k+'\')">'+x.l+(x.s?'<small>'+x.s+'</small>':'')+'</button>'});
+ return h+'</div>'}
+function pickSel(k){SEL[VIEW]=k;sumRender();var c=$("chips"),b=c&&c.querySelector(".on");if(c&&b)c.scrollLeft=b.offsetLeft-c.clientWidth/2+b.offsetWidth/2}
+function detailHTML(){
+ var s=SEL[VIEW],lo,hi,al=alloc(),w="",pm="",h="";
+ if(VIEW==="week"){var q=S.periods.filter(function(p){return p.a===s})[0];lo=s;hi=q?q.b:s}
+ else if(VIEW==="month"){lo=s+"-01";hi=s+"-31"}else{lo=s+"-01-01";hi=s+"-12-31"}
+ if(VIEW!=="week")S.periods.forEach(function(p,i){if(p.a>=lo&&p.a<=hi)w+='<tr><td>'+dd(p.a)+' – '+dd(p.b)+'</td><td>'+money(al[i].d)+'</td><td>'+money(al[i].a)+'</td><td>'+(al[i].ok?'Paid':al[i].part?'Part':'Unpaid')+'</td></tr>'});
+ S.payments.slice().sort(function(x,y){return(x.d||"").localeCompare(y.d||"")}).forEach(function(p){if(p.d>=lo&&p.d<=hi)pm+='<tr><td>'+fmt(p.d)+'</td><td>'+money(num(p.m))+'</td><td><span class="cat '+catOf(p)+'">'+catOf(p)+'</span></td><td>'+esc(p.n)+'</td></tr>'});
+ if(w)h+='<div class="mo">Weeks</div><table><tr><th>Week</th><th>Due</th><th>Paid</th><th>Status</th></tr>'+w+'</table>';
+ h+='<div class="mo">Payments</div>'+(pm?'<table><tr><th>Date</th><th>Amount</th><th>Type</th><th>Note</th></tr>'+pm+'</table>':'<p class="lbl">No payments in this period.</p>');
+ return h}
+function isoYear(s){var d=new Date(s+"T00:00:00");d.setDate(d.getDate()+3-(d.getDay()+6)%7);return d.getFullYear()}
+function wd(s){return s?new Date(s+"T00:00:00").toLocaleDateString("en-AU",{weekday:"short",day:"numeric",month:"short"}):"—"}
+function hlabel(p){return "Week "+isoWeek(p.a)+" · "+wd(p.a)+" – "+wd(p.b)}
+function coverMap(){var al=alloc(),m=new Map();S.periods.forEach(function(p,i){m.set(p,al[i].pays.map(function(z){return{d:z.q.d,t:z.t}}))});return m}
+function histData(){
+ var al=alloc(),cm=coverMap(),R=[],due=0,paid=0,pw=new Map();S.periods.forEach(function(q,i){al[i].pays.forEach(function(z){var a=pw.get(z.q)||[];a.push(q);pw.set(z.q,a)})});
+ S.periods.forEach(function(p,i){if(!p.a)return;
+  if(H.wk){if(p.a!==H.wk)return}else{if(H.y&&p.a.slice(0,4)!==H.y)return;if(H.m&&p.a.slice(5,7)!==H.m)return}
+  var x=al[i];due+=x.d;paid+=x.a;
+  var cv=(cm.get(p)||[]).map(function(z){return fmt(z.d).slice(0,5)+" "+money(z.t)}).join(" · ");
+  var rc=S.payments.filter(function(q){return q.d>=p.a&&q.d<=p.b}).sort(function(u,v){return(u.d||"").localeCompare(v.d||"")});
+  R.push({p:p,x:x,cv:cv,rc:rc})});
+ R.reverse();return{R:R,due:due,paid:paid,pw:pw}}
+function renderHist(){
+ var ys=[],f=S.periods.map(function(p){return p.a}).filter(Boolean).sort()[0]||today(),cy=+today().slice(0,4);
+ for(var y=+f.slice(0,4);y<=cy;y++)ys.push(""+y);
+ $("hy").innerHTML='<option value="">All years</option>'+ys.map(function(y){return '<option value="'+y+'"'+(H.y===y?' selected':'')+'>'+y+'</option>'}).join("");
+ $("hm").innerHTML='<option value="">All months</option>'+MN.map(function(n,i){var v=String(i+1).padStart(2,"0");return '<option value="'+v+'"'+(H.m===v?' selected':'')+'>'+n+'</option>'}).join("");
+ var D=histData(),ow=D.due-D.paid,h='<div class="hbar"><span>Showing <b>'+D.R.length+'</b> week'+(D.R.length==1?'':'s')+'</span><span>Due <b>'+money(D.due)+'</b></span><span>Paid <b>'+money(D.paid)+'</b></span><span>Owing <b class="'+(ow>0.005?'bad':'ok')+'">'+money(ow)+'</b></span></div>';
+ D.R.forEach(function(r){var p=r.p;
+  h+='<div class="hc"><div class="hh"><b>'+esc(hlabel(p))+'</b><span class="n">'+money(r.x.d)+'</span></div><div class="hs">'+chip(p,r.x)+(r.cv?' Covered by '+esc(r.cv):'')+(p.n?' · '+esc(p.n):'')+'</div><div><button class="pb'+(r.x.ok?' sec':'')+'" onclick="openWeek('+S.periods.indexOf(p)+')">'+(r.x.ok?'✎ Edit':'✓ Mark paid')+'</button></div>'+
+  (r.rc.length?'<div class="hp">Paid during this week:<br>'+r.rc.map(function(q){return fmt(q.d).slice(0,5)+' '+money(num(q.m))+' <span class="cat '+catOf(q)+'">'+catOf(q)+'</span>'+forWk(q,r.p,D.pw)}).join('<br>')+'</div>':'')+'</div>'});
+ if(!D.R.length)h+='<p class="lbl" style="text-align:center">No weeks here yet.</p>';
+ $("hlist").innerHTML=h}
+function hsync(p){H.wk=p.a;H.y=p.a.slice(0,4);H.m="";$("hw").value=isoWeek(p.a)}
+function hset(){H.y=$("hy").value;H.m=$("hm").value;H.wk=null;$("hw").value="";$("hmsg").textContent="";renderHist()}
+function hweek(v){
+ var n=+v;if(!n)return;
+ var y=+(H.y||today().slice(0,4)),p=S.periods.filter(function(q){return q.a&&isoWeek(q.a)===n&&isoYear(q.a)===y})[0];
+ if(p){hsync(p);$("hmsg").textContent=""}else $("hmsg").textContent="No week "+n+" in "+y+" yet.";
+ renderHist()}
+function curIdx(){var t=today(),k=-1;S.periods.forEach(function(p,i){if(p.a&&p.a<=t)k=i});return k}
+function hnav(d){
+ var ps=S.periods;
+ if(d===null){H.wk=null;$("hw").value="";$("hmsg").textContent="";renderHist();return}
+ if(!ps.length)return;
+ var i=d===0?curIdx():(H.wk?ps.findIndex(function(p){return p.a===H.wk}):curIdx())+d;
+ i=Math.max(0,Math.min(ps.length-1,i));
+ hsync(ps[i]);$("hmsg").textContent="";renderHist()}
+function histText(){
+ var D=histData(),L=["Payment history – "+(S.name||""),"Showing: "+(H.wk?"Week "+isoWeek(H.wk)+", "+H.wk.slice(0,4):(H.y||"All years")+" · "+(H.m?MN[+H.m-1]:"All months")),""];
+ D.R.forEach(function(r){var p=r.p;
+  L.push(hlabel(p)+": "+money(r.x.d)+" – "+(r.x.ok?"Paid":r.x.part?"Part paid ("+money(r.x.a)+")":"Unpaid")+(r.cv?" (covered by "+r.cv+")":"")+(p.n?" ["+p.n+"]":""));
+  r.rc.forEach(function(q){L.push("   Paid on "+fmt(q.d)+" "+money(num(q.m))+" ("+catOf(q)+")"+forWk(q,p,D.pw))})});
+ L.push("","Due "+money(D.due)+" · Paid "+money(D.paid)+" · Owing "+money(D.due-D.paid));
+ return L.join("\n")}
+function shareH(){
+ var t=histText();$("box").value=t;
+ if(navigator.share){navigator.share({text:t}).catch(function(){copyBox()})}else copyBox()}
+function setView(v){VIEW=v;sumRender()}
+function sumData(){
+ var al=alloc(),R=[],td=0,tp=0;
+ if(VIEW==="week"){
+  S.periods.forEach(function(p,i){var x=al[i];if(SEL.week&&p.a!==SEL.week)return;td+=x.d;tp+=x.a;
+   R.push([dd(p.a)+" – "+dd(p.b),money(x.d),money(x.a),x.ok?"Paid "+fmt(x.on).slice(0,5):x.part?"Part":"Unpaid"])});
+  return{H:["Week","Due","Paid","Status"],R:R,T:SEL.week?null:["Total",money(td),money(tp),""]}}
+ var n=VIEW==="month"?7:4,m={};opts().forEach(function(o){m[o.k]={d:0,p:0}});
+ S.periods.forEach(function(p){var k=(p.a||"").slice(0,n);if(!k)return;m[k]=m[k]||{d:0,p:0};m[k].d+=num(p.m)});
+ S.payments.filter(isRent).forEach(function(p){var k=(p.d||"").slice(0,n);if(!k)return;m[k]=m[k]||{d:0,p:0};m[k].p+=num(p.m)});
+ Object.keys(m).sort().forEach(function(k){var o=m[k];td+=o.d;tp+=o.p;
+  var lab=VIEW==="month"?new Date(k+"-01T00:00:00").toLocaleDateString("en-AU",{month:"short",year:"numeric"}):k;
+  if(!SEL[VIEW]||SEL[VIEW]===k)R.push([lab,money(o.d),money(o.p),money(td-tp)])});
+ return{H:["Period","Due","Paid","Owing"],R:R,T:SEL[VIEW]?null:["Total",money(td),money(tp),money(td-tp)]}}
+function sumRender(){
+ $("stabs").innerHTML=[["week","Weekly"],["month","Monthly"],["year","Yearly"],["index","Index"]].map(function(t){return '<button class="sec'+(VIEW===t[0]?' on':'')+'" onclick="setView(\''+t[0]+'\')">'+t[1]+'</button>'}).join("");
+ if(VIEW==="index"){$("sumtbl").innerHTML=indexHTML();return}
+ var D=sumData();
+ $("sumtbl").innerHTML=chipsHTML()+'<table><tr>'+D.H.map(function(h){return '<th>'+h+'</th>'}).join("")+'</tr>'+
+  D.R.map(function(r){return '<tr>'+r.map(function(c){return '<td>'+esc(c)+'</td>'}).join("")+'</tr>'}).join("")+
+  (D.T?'<tr class="tot">'+D.T.map(function(c){return '<td>'+esc(c)+'</td>'}).join("")+'</tr>':'')+'</table>'+(SEL[VIEW]?detailHTML():paidTable())}
+function paidTable(){
+ var P=S.payments.filter(isRent).sort(function(x,y){return(x.d||"").localeCompare(y.d||"")}),t=0,d=0;
+ S.periods.forEach(function(x){d+=num(x.m)});
+ if(!P.length)return '<p class="lbl" style="margin-top:14px">No rent payments yet.</p>';
+ P.forEach(function(p){t+=num(p.m)});
+ return '<div class="lbl" style="margin:18px 0 4px;font-weight:700;letter-spacing:.08em">RENT PAID</div><table><tr><th>Date</th><th>Amount</th><th>Note</th></tr>'+P.map(function(p){return '<tr><td>'+fmt(p.d)+'</td><td>'+money(num(p.m))+'</td><td>'+esc(p.n)+'</td></tr>'}).join("")+'<tr class="tot"><td>Total paid</td><td>'+money(t)+'</td><td></td></tr></table><p style="font-weight:700;margin:12px 0 0">'+(d-t>0.005?'Still owing '+money(d-t):d-t<-0.005?'Credit '+money(t-d):'All paid up')+'</p>'}
+var CATS=["Rent","Bond","Bills","Other"];
+function catOf(p){return CATS.indexOf(p.c)<0?"Rent":p.c}
+function isRent(p){return catOf(p)==="Rent"}
+function byDate(x,y){return(y.d||"").localeCompare(x.d||"")}
+function cover(){
+ var ps=S.payments.filter(isRent).map(function(p){return{p:p,r:num(p.m),w:[]}}).sort(function(x,y){return(x.p.d||"").localeCompare(y.p.d||"")}),k=0;
+ S.periods.forEach(function(q){var need=num(q.m);
+  while(need>0.005&&k<ps.length){if(ps[k].r<=0.005){k++;continue}var t=Math.min(ps[k].r,need);ps[k].r-=t;need-=t;ps[k].w.push({q:q,t:t})}});
+ return ps}
+function idxData(){
+ var ps=cover(),C={},al=alloc(),ow=[],amt=0;
+ function add(c,e){var o=C[c]=C[c]||{keys:[],g:{},t:0},k=(e.d||"").slice(0,7);if(!o.g[k]){o.g[k]=[];o.keys.push(k)}o.g[k].push(e);o.t+=e.m}
+ ps.sort(function(x,y){return byDate(x.p,y.p)});
+ ps.forEach(function(e){var p=e.p,w=e.w,c;
+  if(w.length)c="Covers "+fmt(w[0].q.a).slice(0,5)+" – "+fmt(w[w.length-1].q.b).slice(0,5)+" ("+w.length+" week"+(w.length==1?"":"s")+")"+(e.r>0.005?" + "+money(e.r)+" credit":"");
+  else c=e.r>0.005?money(e.r)+" credit for the next weeks":"";
+  add("Rent",{d:p.d,m:num(p.m),n:p.n,c:c})});
+ S.payments.filter(function(p){return!isRent(p)}).sort(byDate).forEach(function(p){add(catOf(p),{d:p.d,m:num(p.m),n:p.n,c:""})});
+ S.periods.forEach(function(q,i){if(!al[i].ok&&al[i].d>0){ow.push(q);amt+=al[i].d-al[i].a}});
+ return{C:C,ow:ow,amt:amt}}
+function mlab(k){return k?new Date(k+"-01T00:00:00").toLocaleDateString("en-AU",{month:"long",year:"numeric"}):"No date"}
+function indexHTML(){
+ var D=idxData(),h="";
+ if(!Object.keys(D.C).length)h+='<p class="lbl">No payments yet.</p>';
+ CATS.forEach(function(c){var o=D.C[c];if(!o)return;
+  h+='<h3 class="ixh"><span class="cat '+c+'">'+c+'</span><span>'+money(o.t)+'</span></h3>';
+  o.keys.forEach(function(k){h+='<div class="mo">'+esc(mlab(k))+'</div>'+o.g[k].map(function(e){return '<div class="ie"><b>'+fmt(e.d)+'</b><span>'+money(e.m)+'</span><small>'+esc(e.c+(e.n?(e.c?" · ":"")+e.n:""))+'</small></div>'}).join("")})});
+ h+='<h3 class="ixh"><span class="cat Rent">Rent</span><span>Still to pay</span></h3>';
+ h+=D.ow.length?'<div class="ie"><b>'+fmt(D.ow[0].a).slice(0,5)+' – '+fmt(D.ow[D.ow.length-1].b).slice(0,5)+'</b><span class="bad">'+money(D.amt)+'</span><small>'+D.ow.length+' week'+(D.ow.length==1?'':'s')+' not fully paid</small></div>':'<div class="ie"><b class="ok">All paid up</b></div>';
+ return h}
+function indexText(){
+ var D=idxData(),L=["Payment index – "+(S.name||"")+" – as of "+fmt(today())];
+ CATS.forEach(function(c){var o=D.C[c];if(!o)return;L.push("",c.toUpperCase()+" – "+money(o.t));
+  o.keys.forEach(function(k){L.push(mlab(k));o.g[k].forEach(function(e){L.push("  "+fmt(e.d)+"  "+money(e.m)+(e.c?"  "+e.c:"")+(e.n?"  ("+e.n+")":""))})})});
+ L.push("","Rent still to pay: "+(D.ow.length?money(D.amt)+" ("+D.ow.length+" week"+(D.ow.length==1?"":"s")+")":"nothing"));return L.join("\n")}
+function summary(){
+ if(VIEW==="index")return indexText();
+ var D=sumData(),L=["Payment record – "+(S.name||"")+" – "+({week:"weekly",month:"monthly",year:"yearly"})[VIEW],"Stay started "+fmt(S.start),"As of "+fmt(today()),""];
+ L.push(D.H.join(" | "));D.R.forEach(function(r){L.push(r.join(" | "))});if(D.T)L.push(D.T.join(" | "));L.push("","Rent paid:");S.payments.filter(isRent).sort(function(x,y){return(x.d||"").localeCompare(y.d||"")}).forEach(function(p){L.push(fmt(p.d)+": "+money(num(p.m))+(p.n?" ("+p.n+")":""))});L.push("",$("line").textContent);
+ return L.join("\n")}
+function stt(a){return a.ok?"Paid":a.part?"Part paid":"Unpaid"}
+function csv(){
+ function q(s){return '"'+String(s==null?"":s).replace(/"/g,'""')+'"'}
+ var al=alloc(),nm=q(S.name),L=["Person,Type,From or date,To,Amount,Note,Status"];
+ S.periods.forEach(function(p,i){L.push([nm,"Week",p.a,p.b,p.m,q(p.n),stt(al[i])].join(","))});
+ S.payments.forEach(function(p){L.push([nm,"Payment: "+catOf(p),p.d,"",p.m,q(p.n),""].join(","))});
+ return L.join("\n")}
+/* backup */
+function say(t){$("msg").textContent=t;$("hmsg").textContent=t}
+function show(t){$("box").value=t;copyBox()}
+function copyBox(){
+ var b=$("box");b.focus();b.select();
+ function fb(){var ok=false;try{ok=document.execCommand("copy")}catch(e){}say(ok?"Copied. You can paste it into a message.":"Select the text in the box (More tab) and copy it.")}
+ if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(b.value).then(function(){say("Copied. You can paste it into a message.")},fb)}else fb()}
+function restore(){
+ var N;
+ try{var o=JSON.parse($("box").value);
+  if(o&&Array.isArray(o.tenants)&&o.tenants.length)N=o;
+  else if(o&&Array.isArray(o.periods)&&Array.isArray(o.payments))N={cur:"t1",tenants:[Object.assign({id:"t1",name:"Tenant 1"},o)]};
+  else throw 0}
+ catch(e){say("That doesn’t look like a backup. Paste the backup into the box first.");return}
+ ask("Replace everything with this backup?",function(){ALL=N;migrate();if(!ALL.al)alignAll();pick();OPEN=null;autoWeeks();save();render();say("Restored.")},{yes:"Restore"})}
+/* tabs */
+function go(t){
+ ["weeks","pay","hist","more"].forEach(function(x){$("v-"+x).className=x===t?"on":""});
+ Array.prototype.forEach.call(document.querySelectorAll("#nav button"),function(b){b.className=b.getAttribute("data-t")===t?"on":""});
+ window.scrollTo(0,0)}
+H.y=today().slice(0,4);$("ptype").innerHTML=CATS.map(function(c){return '<option>'+c+'</option>'}).join("");$("pdate").value=today();load();LT=ALL.ts||0;migrate();if(!ALL.al)alignAll();pick();autoWeeks();render();go("weeks");BOOT=false;cloudInit();
+if("serviceWorker"in navigator){
+ window.addEventListener("load",function(){navigator.serviceWorker.register("sw.js").catch(function(){})});
+ navigator.serviceWorker.ready.then(function(){$("off").textContent="Works offline ✓"})}
+</script>
+</body>
+</html>
