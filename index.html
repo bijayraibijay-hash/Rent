@@ -128,10 +128,19 @@ section{display:none}section.on{display:block}
   <div class="card"><h2>Weeks</h2>
     <p class="lbl">Every week runs Monday to Sunday, and a new week is added each Monday. If some weeks start on another day, align them. Amounts, notes and payments are kept.</p>
     <button class="sec" onclick="alignNow()">Align this person’s weeks to Mon–Sun</button></div>
-  <div class="card"><h2>Backup &amp; share</h2>
-    <p class="lbl">Backup holds everyone. CSV is for the person selected. To move your records to another phone, copy the backup, paste it there and tap Restore.</p>
-    <div class="btns"><button class="sec" onclick="show(csv())">CSV</button><button class="sec" onclick="show(JSON.stringify(ALL))">Backup</button><button class="sec" onclick="restore()">Restore</button></div>
-    <textarea id="box" placeholder="Tap a button above. To restore, paste a backup here, then tap Restore." spellcheck="false"></textarea>
+  <div class="card"><h2>Backup &amp; restore</h2>
+    <p class="lbl" id="lastbk">No backup yet. Tap Back up now.</p>
+    <button class="big" onclick="backupNow()">Back up now (share to Notes, Files…)</button>
+    <button class="sec" style="width:100%;margin-bottom:10px" onclick="pasteRestore()">Paste &amp; restore from clipboard</button>
+    <div class="two"><button onclick="saveFile()">Save backup file</button><button class="sec" onclick="$('rfile').click()">Open backup file</button></div>
+    <input id="rfile" type="file" accept=".json,application/json,text/plain" style="display:none" onchange="openFile(this)">
+    <p class="lbl">Backup text (copy this if sharing doesn’t work)</p>
+    <textarea id="box" readonly placeholder="Tap Back up now to fill this in" spellcheck="false"></textarea>
+    <button class="sec" style="width:100%;margin:8px 0 14px" onclick="copyBackup()">Copy backup text</button>
+    <p class="lbl">Restore from text: paste a backup here</p>
+    <textarea id="rbox" placeholder="Paste your backup text here" spellcheck="false"></textarea>
+    <button class="sec" style="width:100%;margin:8px 0" onclick="restore()">Restore from text</button>
+    <div class="btns"><button class="sec" onclick="show(csv())">Copy CSV (this person)</button></div>
     <p class="lbl" id="msg" style="margin-top:6px"></p></div>
   <p class="lbl" id="off" style="text-align:center"></p>
   <p class="lbl" id="cloud" style="text-align:center"></p>
@@ -255,7 +264,7 @@ function render(){
    if(OPEN===p)rows+=panel("payments",i,[["Date","d","date"],["Amount ($)","m","number"],["Category","c","cat"],["For week","w","wk","f"],["Note","n","text","f"]])});
   if(rows)h+='<div class="sect"><span class="cat '+c+'">'+c+'</span><b>'+money(tot)+'</b></div>'+rows});
  $("pays").innerHTML=h||'<p class="lbl" style="text-align:center">No payments yet.</p>';
- var cw=$("pweek").value;$("pweek").innerHTML=weekOpts(cw);$("nm").value=S.name;$("sdate").value=S.start||"";
+ lastBk();var cw=$("pweek").value;$("pweek").innerHTML=weekOpts(cw);$("nm").value=S.name;$("sdate").value=S.start||"";
  $("rates").innerHTML=S.rates.map(function(r,i){return '<div class="rr">'+inp("rates",i,"from","date")+inp("rates",i,"m","number")+'<button class="del" onclick="del(\'rates\','+i+')" aria-label="Delete">✕</button></div>'}).join("");
  totals()}
 function totals(){
@@ -550,14 +559,49 @@ function copyBox(){
  var b=$("box");b.focus();b.select();
  function fb(){var ok=false;try{ok=document.execCommand("copy")}catch(e){}say(ok?"Copied. You can paste it into a message.":"Select the text in the box (More tab) and copy it.")}
  if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(b.value).then(function(){say("Copied. You can paste it into a message.")},fb)}else fb()}
-function restore(){
+function restoreText(txt){
  var N;
- try{var o=JSON.parse($("box").value);
+ try{var o=JSON.parse(txt);
   if(o&&Array.isArray(o.tenants)&&o.tenants.length)N=o;
   else if(o&&Array.isArray(o.periods)&&Array.isArray(o.payments))N={cur:"t1",tenants:[Object.assign({id:"t1",name:"Tenant 1"},o)]};
   else throw 0}
- catch(e){say("That doesn’t look like a backup. Paste the backup into the box first.");return}
- ask("Replace everything with this backup?",function(){ALL=N;migrate();if(!ALL.al)alignAll();pick();OPEN=null;autoWeeks();save();render();say("Restored.")},{yes:"Restore"})}
+ catch(e){say("That doesn’t look like a backup. Paste the backup text first.");return}
+ ask("Replace everything with this backup?",function(){ALL=N;migrate();if(!ALL.al)alignAll();pick();OPEN=null;autoWeeks();save();render();say("Restored ✓")},{yes:"Restore"})}
+function restore(){restoreText($("rbox").value)}
+function pasteRestore(){
+ var m="Can’t read the clipboard here. Paste the backup into the box below and tap Restore from text.";
+ if(navigator.clipboard&&navigator.clipboard.readText){navigator.clipboard.readText().then(function(t){restoreText(t)},function(){say(m)})}else say(m)}
+function openFile(inp){
+ var f=inp.files&&inp.files[0];if(!f)return;
+ var r=new FileReader();r.onload=function(){restoreText(String(r.result||""))};r.onerror=function(){say("Couldn’t read that file.")};
+ r.readAsText(f);inp.value=""}
+function lastBk(){
+ var e=$("lastbk");if(!e)return;
+ if(!ALL.bk){e.textContent="No backup yet. Tap Back up now.";return}
+ var n=Math.floor((Date.now()-ALL.bk)/864e5);
+ e.textContent="Last backup: "+ddy(iso(new Date(ALL.bk)))+" ("+(n<=0?"today":n===1?"1 day ago":n+" days ago")+")"}
+function markBackup(){ALL.bk=Date.now();save();lastBk()}
+function fname(){return "rent-record-backup-"+today()+".json"}
+function copyThen(){
+ var b=$("box");b.focus();b.select();
+ function ok(){markBackup();say("Backup copied. Paste it somewhere safe, like Notes or Keep.")}
+ function fb(){var o=false;try{o=document.execCommand("copy")}catch(e){}if(o)ok();else say("Select the backup text in the box and copy it.")}
+ if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(b.value).then(ok,fb)}else fb()}
+function copyBackup(){$("box").value=JSON.stringify(ALL);copyThen()}
+function shareText(t){
+ if(navigator.share){navigator.share({title:"Rent Record backup",text:t}).then(function(){markBackup();say("Backup shared ✓")},function(e){if(e&&e.name==="AbortError")say("Cancelled.");else copyThen()});return}
+ copyThen()}
+function shareFile(t,fallback){
+ try{var f=new File([t],fname(),{type:"application/json"});
+  if(navigator.canShare&&navigator.canShare({files:[f]})){
+   navigator.share({files:[f],title:"Rent Record backup"}).then(function(){markBackup();say("Backup shared ✓")},function(e){if(e&&e.name==="AbortError")say("Cancelled.");else fallback(t)});return}}catch(e){}
+ fallback(t)}
+function backupNow(){var t=JSON.stringify(ALL);$("box").value=t;shareFile(t,shareText)}
+function dl(t){
+ try{var u=URL.createObjectURL(new Blob([t],{type:"application/json"})),a=document.createElement("a");a.href=u;a.download=fname();document.body.appendChild(a);a.click();
+  setTimeout(function(){URL.revokeObjectURL(u);a.remove()},1000);say("Backup file download started. If nothing appears, use Back up now or Copy backup text.")}
+ catch(e){say("This page can’t save files. Use Back up now or Copy backup text.")}}
+function saveFile(){var t=JSON.stringify(ALL);$("box").value=t;shareFile(t,dl)}
 /* tabs */
 function go(t){
  ["weeks","pay","hist","more"].forEach(function(x){$("v-"+x).className=x===t?"on":""});
