@@ -559,14 +559,21 @@ function copyBox(){
  var b=$("box");b.focus();b.select();
  function fb(){var ok=false;try{ok=document.execCommand("copy")}catch(e){}say(ok?"Copied. You can paste it into a message.":"Select the text in the box (More tab) and copy it.")}
  if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(b.value).then(function(){say("Copied. You can paste it into a message.")},fb)}else fb()}
+function parseBackup(txt){
+ var t=String(txt==null?"":txt).replace(/[\u201C\u201D\u201E\u201F]/g,'"').replace(/[\u2018\u2019]/g,"'").replace(/[\u200B-\u200D\uFEFF]/g,"").replace(/\u00A0/g," ").trim();
+ if(!t)return{err:"The box is empty. Paste your backup text into it first."};
+ var i=t.indexOf("{"),j=t.lastIndexOf("}");
+ if(i>=0&&j<i)return{err:"The backup text looks cut off. Copy the whole text again, to the very end."};
+ if(i<0)return{err:"That isn’t a backup. It has no data in it ("+t.length+" characters, starting “"+t.slice(0,25)+"”)."};
+ var o;try{o=JSON.parse(t.slice(i,j+1))}catch(e){return{err:"The backup text looks cut off or changed. Copy the whole text again, from the first { to the last }."}}
+ if(o&&Array.isArray(o.tenants)&&o.tenants.length)return{N:o};
+ if(o&&Array.isArray(o.periods)&&Array.isArray(o.payments))return{N:{cur:"t1",tenants:[Object.assign({id:"t1",name:"Tenant 1"},o)]}};
+ return{err:"That is data, but not from this Rent Record app (no weeks or payments found). A backup from another app can’t be used here."}}
 function restoreText(txt){
- var N;
- try{var o=JSON.parse(txt);
-  if(o&&Array.isArray(o.tenants)&&o.tenants.length)N=o;
-  else if(o&&Array.isArray(o.periods)&&Array.isArray(o.payments))N={cur:"t1",tenants:[Object.assign({id:"t1",name:"Tenant 1"},o)]};
-  else throw 0}
- catch(e){say("That doesn’t look like a backup. Paste the backup text first.");return}
- ask("Replace everything with this backup?",function(){ALL=N;migrate();if(!ALL.al)alignAll();pick();OPEN=null;autoWeeks();save();render();say("Restored ✓")},{yes:"Restore"})}
+ var p=parseBackup(txt);
+ if(p.err){say(p.err);return}
+ var N=p.N,np=0,nw=0;N.tenants.forEach(function(T){np+=(T.payments||[]).length;nw+=(T.periods||[]).length});
+ ask("Replace everything with this backup? It has "+N.tenants.length+" person"+(N.tenants.length==1?"":"s")+", "+nw+" week"+(nw==1?"":"s")+" and "+np+" payment"+(np==1?"":"s")+".",function(){ALL=N;migrate();if(!ALL.al)alignAll();pick();OPEN=null;autoWeeks();save();render();say("Restored ✓")},{yes:"Restore"})}
 function restore(){restoreText($("rbox").value)}
 function pasteRestore(){
  var m="Can’t read the clipboard here. Paste the backup into the box below and tap Restore from text.";
